@@ -1,7 +1,7 @@
 package com.bezkoder.spring.jpa.h2.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "bookings")
@@ -10,11 +10,11 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int bookingId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", referencedColumnName = "id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roomId", referencedColumnName = "roomId")
     private Room room;
 
@@ -23,10 +23,13 @@ public class Booking {
     private String timeTo;
     private String purpose;
 
+    // Constructors, getters, and setters
+
     public Booking() {
     }
 
-    public Booking(User user, Room room, LocalDateTime dateOfBooking, String timeFrom, String timeTo, String purpose) {
+    public Booking(int bookingId, User user, Room room, LocalDateTime dateOfBooking, String timeFrom, String timeTo, String purpose) {
+        this.bookingId = bookingId;
         this.user = user;
         this.room = room;
         this.dateOfBooking = dateOfBooking;
@@ -90,5 +93,4 @@ public class Booking {
     public void setPurpose(String purpose) {
         this.purpose = purpose;
     }
-
 }
