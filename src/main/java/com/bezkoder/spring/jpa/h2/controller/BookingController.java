@@ -17,7 +17,6 @@ import com.bezkoder.spring.jpa.h2.model.BookingRequest;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
-
 @RestController
 @RequestMapping("/api/book")
 public class BookingController {
@@ -31,15 +30,15 @@ public class BookingController {
 
     // Create a new Booking
     @PostMapping
-    public ResponseEntity<String> createBooking(@RequestBody BookingRequest bookingRequest) {
+    public ResponseEntity<Object> createBooking(@RequestBody BookingRequest bookingRequest) {
         Optional<User> user = userRepository.findById((long) bookingRequest.getUserId());
         if (!user.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse("User does not exist"));
         }
 
         Optional<Room> room = roomRepository.findById(bookingRequest.getRoomId());
         if (!room.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Room does not exist");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse("Room does not exist"));
         }
 
         Booking booking = new Booking();
@@ -51,22 +50,19 @@ public class BookingController {
         booking.setTimeTo(bookingRequest.getTimeTo());
         booking.setPurpose(bookingRequest.getPurpose());
 
-        // Here you would check availability and other business logic like time
-        // validation
+        // Here you would check availability and other business logic like time validation
         bookingRepository.save(booking);
         return ResponseEntity.ok("Booking created successfully");
     }
 
     // Update an existing booking
     @PatchMapping("/{bookingId}")
-    public ResponseEntity<String> updateBooking(@PathVariable int bookingId, @RequestBody Booking bookingDetails) {
+    public ResponseEntity<Object> updateBooking(@PathVariable int bookingId, @RequestBody Booking bookingDetails) {
         Optional<Booking> existingBooking = bookingRepository.findById(bookingId);
         if (!existingBooking.isPresent()) {
-            return ResponseEntity.notFound().build();
+            return new ResponseEntity<>(errorResponse("Booking does not exist"), HttpStatus.NOT_FOUND);
         }
         Booking booking = existingBooking.get();
-        // Here you would check availability and other business logic like time
-        // validation
         booking.setDateOfBooking(bookingDetails.getDateOfBooking());
         booking.setTimeFrom(bookingDetails.getTimeFrom());
         booking.setTimeTo(bookingDetails.getTimeTo());
@@ -77,38 +73,26 @@ public class BookingController {
 
     // Delete a booking
     @DeleteMapping("/{bookingId}")
-    public ResponseEntity<String> deleteBooking(@PathVariable int bookingId) {
+    public ResponseEntity<Object> deleteBooking(@PathVariable int bookingId) {
         if (!bookingRepository.existsById(bookingId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Booking does not exist");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse("Booking does not exist"));
         }
         bookingRepository.deleteById(bookingId);
         return ResponseEntity.ok("Booking deleted successfully");
     }
 
+    // Endpoint to retrieve booking history
     @GetMapping("/history")
     public ResponseEntity<?> getBookingHistory(@RequestParam int userId) {
         Optional<User> user = userRepository.findById((long) userId);
         if (!user.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse("User does not exist"));
         }
 
         // Fetch past bookings using the user ID and a date filter
         List<Booking> bookings = bookingRepository.findByUserIdAndDateOfBookingBefore(userId, LocalDateTime.now());
 
-        // Convert each booking into a Map structure for the response
-        List<Map<String, Object>> result = bookings.stream().map(booking -> {
-            Map<String, Object> bookingMap = new HashMap<>();
-            bookingMap.put("room", booking.getRoom().getRoomName());
-            bookingMap.put("roomID", booking.getRoom().getRoomId());
-            bookingMap.put("bookingID", booking.getBookingId());
-            bookingMap.put("dateOfBooking", booking.getDateOfBooking().toString());
-            bookingMap.put("timeFrom", booking.getTimeFrom());
-            bookingMap.put("timeTo", booking.getTimeTo());
-            bookingMap.put("purpose", booking.getPurpose());
-            return bookingMap;
-        }).collect(Collectors.toList());
-
-        // Return the list of booking details
+        List<Map<String, Object>> result = transformBookingsToResponse(bookings);
         return ResponseEntity.ok(result);
     }
 
@@ -117,33 +101,32 @@ public class BookingController {
     public ResponseEntity<?> getUpcomingBookings(@RequestParam int userId) {
         Optional<User> user = userRepository.findById((long) userId);
         if (!user.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse("User does not exist"));
         }
 
         List<Booking> bookings = bookingRepository.findByUserIdAndDateOfBookingAfter(userId, LocalDateTime.now());
 
-        List<Map<String, Object>> result = bookings.stream().map(booking -> {
-            Map<String, Object> bookingMap = new HashMap<>();
-            bookingMap.put("room", booking.getRoom().getRoomName());
-            bookingMap.put("roomID", booking.getRoom().getRoomId());
-            bookingMap.put("bookingID", booking.getBookingId());
-            bookingMap.put("dateOfBooking", booking.getDateOfBooking().toString());
-            bookingMap.put("timeFrom", booking.getTimeFrom());
-            bookingMap.put("timeTo", booking.getTimeTo());
-            bookingMap.put("purpose", booking.getPurpose());
-            return bookingMap;
-        }).collect(Collectors.toList());
-
+        List<Map<String, Object>> result = transformBookingsToResponse(bookings);
         return ResponseEntity.ok(result);
     }
 
-     @GetMapping("/bookings")
+    @GetMapping("/bookings")
     public ResponseEntity<List<Map<String, Object>>> getAllBookings() {
         // Fetch all bookings from the repository
         List<Booking> bookings = bookingRepository.findAll();
 
-        // Convert each booking to a Map structure for the response
-        List<Map<String, Object>> result = bookings.stream().map(booking -> {
+        List<Map<String, Object>> result = transformBookingsToResponse(bookings);
+        return ResponseEntity.ok(result);
+    }
+
+    private Map<String, String> errorResponse(String errorMessage) {
+        Map<String, String> error = new HashMap<>();
+        error.put("Error", errorMessage);
+        return error;
+    }
+
+    private List<Map<String, Object>> transformBookingsToResponse(List<Booking> bookings) {
+        return bookings.stream().map(booking -> {
             Map<String, Object> bookingMap = new HashMap<>();
             bookingMap.put("room", booking.getRoom().getRoomName());
             bookingMap.put("roomID", booking.getRoom().getRoomId());
@@ -154,9 +137,5 @@ public class BookingController {
             bookingMap.put("purpose", booking.getPurpose());
             return bookingMap;
         }).collect(Collectors.toList());
-
-        // Return the list of booking details
-        return ResponseEntity.ok(result);
     }
-
 }
