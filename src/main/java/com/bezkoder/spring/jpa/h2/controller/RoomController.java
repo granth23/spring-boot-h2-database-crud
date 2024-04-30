@@ -4,11 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
+import java.util.*;
 
 import com.bezkoder.spring.jpa.h2.model.Room;
 import com.bezkoder.spring.jpa.h2.repository.RoomRepository;
-
-import java.util.*;
+import com.bezkoder.spring.jpa.h2.model.Booking;
+import com.bezkoder.spring.jpa.h2.repository.BookingRepository;
 
 @RestController
 public class RoomController {
@@ -16,11 +17,40 @@ public class RoomController {
     @Autowired
     private RoomRepository roomRepository;
 
+    @Autowired
+    private BookingRepository bookingRepository;
 
     @GetMapping("/rooms")
-    public ResponseEntity<List<Room>> getAllRooms() {
+    public ResponseEntity<?> getAllRooms() {
         List<Room> rooms = roomRepository.findAll();
-        return ResponseEntity.ok(rooms);
+        List<Booking> bookings = bookingRepository.findAll();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Room room : rooms) {
+            Map<String, Object> roomDetails = new HashMap<>();
+            roomDetails.put("roomID", room.getRoomID());
+            roomDetails.put("roomName", room.getRoomName());
+            roomDetails.put("roomCapacity", room.getRoomCapacity());
+
+
+            List<Map<String, Object>> roomBookings = new ArrayList<>();
+            roomDetails.put("bookings", roomBookings);
+
+            for (Booking booking : bookings) {
+                if (booking.getRoom().getRoomID() == (room.getRoomID())) {
+                    Map<String, Object> bookingDetails = new HashMap<>();
+                    bookingDetails.put("bookingID", booking.getBookingId());
+                    bookingDetails.put("userID", booking.getUser().getUserID());
+                    bookingDetails.put("dateOfBooking", booking.getDateOfBooking().toString().split("T")[0]);
+                    bookingDetails.put("timeFrom", booking.getTimeFrom());
+                    bookingDetails.put("timeTo", booking.getTimeTo());
+                    bookingDetails.put("purpose", booking.getPurpose());
+                    roomBookings.add(bookingDetails);
+                }
+            }
+            result.add(roomDetails);
+        }
+        return ResponseEntity.ok(result);
     }
 
 
