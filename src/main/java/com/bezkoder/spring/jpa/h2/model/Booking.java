@@ -11,11 +11,11 @@ public class Booking {
     private int bookingId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "userID")  // Ensure these are correctly named
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roomId", referencedColumnName = "roomId")
+    @JoinColumn(name = "roomID", referencedColumnName = "roomID")
     private Room room;
 
     private LocalDateTime dateOfBooking;
@@ -93,4 +93,6 @@ public class Booking {
     public void setPurpose(String purpose) {
         this.purpose = purpose;
     }
+
+
 }

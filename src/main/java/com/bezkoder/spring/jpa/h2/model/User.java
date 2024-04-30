@@ -1,5 +1,6 @@
 package com.bezkoder.spring.jpa.h2.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 @Entity
@@ -8,7 +9,9 @@ public class User {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private long id;
+  @Column(name = "userID")
+  @JsonProperty("userID")
+  private long userID;
 
   @Column(name = "name")
   private String name;
@@ -27,12 +30,12 @@ public class User {
     this.password = password;
   }
 
-  public long getId() {
-    return id;
+  public long getUserID() {
+    return userID;
   }
 
-  public void setId(long id) {
-    this.id = id;
+  public void setUserID(long userID) {
+    this.userID = userID;
   }
 
   public String getName() {

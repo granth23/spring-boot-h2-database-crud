@@ -26,47 +26,48 @@ public class RoomController {
     // Create a new room
     @PostMapping("/rooms")
     public ResponseEntity<Object> addRoom(@RequestBody Room room) {
-        if (room.getCapacity() < 0) {
-            return ResponseEntity.badRequest().body(errorResponse("Invalid capacity"));
-        }
         if (roomRepository.existsByRoomName(room.getRoomName())) {
             return new ResponseEntity<>(errorResponse("Room already exists"), HttpStatus.FORBIDDEN);
+        }
+        if (room.getRoomCapacity() < 0) {
+            return ResponseEntity.badRequest().body(errorResponse("Invalid capacity"));
         }
         roomRepository.save(room);
         return ResponseEntity.ok("Room created successfully");
     }
 
     // Update a room
-    @PatchMapping("/{roomId}")
-    public ResponseEntity<Object> updateRoom(@PathVariable int roomId, @RequestBody Room roomDetails) {
-        Optional<Room> roomData = roomRepository.findById(roomId);
+    @PatchMapping("/rooms")
+    public ResponseEntity<Object> updateRoom(@RequestBody Room roomDetails) {
+        int roomID = roomDetails.getRoomID();
+        Optional<Room> roomData = roomRepository.findById(roomID);
         if (!roomData.isPresent()) {
             return new ResponseEntity<>(errorResponse("Room does not exist"), HttpStatus.NOT_FOUND);
         }
         Room room = roomData.get();
-        if (roomDetails.getCapacity() < 0) {
-            return ResponseEntity.badRequest().body(errorResponse("Invalid capacity"));
+        if (roomDetails.getRoomCapacity() < 0) {
+            return ResponseEntity.badRequest().body(errorResponse("Invalid room capacity"));
         }
         room.setRoomName(roomDetails.getRoomName());
-        room.setCapacity(roomDetails.getCapacity());
+        room.setRoomCapacity(roomDetails.getRoomCapacity());  // Updated to use roomCapacity
         roomRepository.save(room);
         return ResponseEntity.ok("Room edited successfully");
     }
 
     // Delete a room
-    @DeleteMapping("/{roomId}")
-    public ResponseEntity<Object> deleteRoom(@PathVariable int roomId) {
-        if (!roomRepository.existsById(roomId)) {
+    @DeleteMapping("/rooms")
+    public ResponseEntity<Object> deleteRoom(@RequestParam int roomID) {
+        if (!roomRepository.existsById(roomID)) {
             return new ResponseEntity<>(errorResponse("Room does not exist"), HttpStatus.NOT_FOUND);
         }
-        roomRepository.deleteById(roomId);
+        roomRepository.deleteById(roomID);
         return ResponseEntity.ok("Room deleted successfully");
     }
 
     // Get a room by id
-    @GetMapping("/{roomId}")
-    public ResponseEntity<Object> getRoomById(@PathVariable int roomId) {
-        Optional<Room> room = roomRepository.findById(roomId);
+    @GetMapping("/rooms/{roomID}")
+    public ResponseEntity<Object> getRoomById(@PathVariable int roomID) {
+        Optional<Room> room = roomRepository.findById(roomID);
         if (!room.isPresent()) {
             return new ResponseEntity<>(errorResponse("Room does not exist"), HttpStatus.NOT_FOUND);
         }

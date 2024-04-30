@@ -1,27 +1,28 @@
 package com.bezkoder.spring.jpa.h2.model;
 
 public class BookingRequest {
-    private int roomId;
-    private int userId;
+    private int roomID;
+    private int userID;
     private String dateOfBooking;
     private String timeFrom;
     private String timeTo;
     private String purpose;
+    private int bookingID;
 
-    public int getRoomId() {
-        return roomId;
+    public int getRoomID() {
+        return roomID;
     }
 
-    public void setRoomId(int roomId) {
-        this.roomId = roomId;
+    public void setRoomID(int roomID) {
+        this.roomID = roomID;
     }
 
-    public int getUserId() {
-        return userId;
+    public int getUserID() {
+        return userID;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUserID(int userID) {
+        this.userID = userID;
     }
 
     public String getDateOfBooking() {
@@ -54,6 +55,14 @@ public class BookingRequest {
 
     public void setPurpose(String purpose) {
         this.purpose = purpose;
+    }
+
+    public int getBookingID() {
+        return bookingID;
+    }
+
+    public void setBookingID(int bookingID) {
+        this.bookingID = bookingID;
     }
 
 }

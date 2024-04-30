@@ -7,24 +7,24 @@ import jakarta.persistence.*;
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int roomId;
+    private int roomID;
     private String roomName;
-    private int capacity;
+    private int roomCapacity;
 
     public Room() {
     }
 
-    public Room(String roomName, int capacity) {
+    public Room(String roomName, int roomCapacity) {
         this.roomName = roomName;
-        this.capacity = capacity;
+        this.roomCapacity = roomCapacity;
     }
 
-    public int getRoomId() {
-        return roomId;
+    public int getRoomID() {
+        return roomID;
     }
 
-    public void setRoomId(int roomId) {
-        this.roomId = roomId;
+    public void setRoomID(int roomID) {
+        this.roomID = roomID;
     }
 
     public String getRoomName() {
@@ -35,12 +35,11 @@ public class Room {
         this.roomName = roomName;
     }
 
-    public int getCapacity() {
-        return capacity;
+    public int getRoomCapacity() {  // Getter name changed
+        return roomCapacity;
     }
 
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
+    public void setRoomCapacity(int roomCapacity) {  // Setter name changed
+        this.roomCapacity = roomCapacity;
     }
-
 }
