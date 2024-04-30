@@ -8,10 +8,7 @@ import org.springframework.http.HttpStatus;
 import com.bezkoder.spring.jpa.h2.model.Room;
 import com.bezkoder.spring.jpa.h2.repository.RoomRepository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class RoomController {
@@ -20,14 +17,14 @@ public class RoomController {
     private RoomRepository roomRepository;
 
     // Get all rooms
-    @GetMapping("/all")
+    @GetMapping("/rooms")
     public ResponseEntity<List<Room>> getAllRooms() {
         List<Room> rooms = roomRepository.findAll();
         return ResponseEntity.ok(rooms);
     }
 
     // Create a new room
-    @PostMapping("/add")
+    @PostMapping("/rooms")
     public ResponseEntity<Object> addRoom(@RequestBody Room room) {
         if (room.getCapacity() < 0) {
             return ResponseEntity.badRequest().body(errorResponse("Invalid capacity"));

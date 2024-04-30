@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/book")
 public class BookingController {
 
     @Autowired
@@ -29,8 +28,11 @@ public class BookingController {
     private RoomRepository roomRepository;
 
     // Create a new Booking
-    @PostMapping
+    @PostMapping("/book")
     public ResponseEntity<Object> createBooking(@RequestBody BookingRequest bookingRequest) {
+        System.out.println("Booking: " + bookingRequest.getUserId() + " " + bookingRequest.getRoomId() + " "
+                + bookingRequest.getDateOfBooking() + " " + bookingRequest.getTimeFrom() + " " + bookingRequest.getTimeTo()
+                + " " + bookingRequest.getPurpose());
         Optional<User> user = userRepository.findById((long) bookingRequest.getUserId());
         if (!user.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse("User does not exist"));
@@ -56,20 +58,27 @@ public class BookingController {
     }
 
     // Update an existing booking
-    @PatchMapping("/{bookingId}")
-    public ResponseEntity<Object> updateBooking(@PathVariable int bookingId, @RequestBody Booking bookingDetails) {
+    @PatchMapping("/book")
+    public ResponseEntity<Object> updateBooking(@RequestParam int bookingId, @RequestBody BookingRequest bookingRequest) {
         Optional<Booking> existingBooking = bookingRepository.findById(bookingId);
         if (!existingBooking.isPresent()) {
             return new ResponseEntity<>(errorResponse("Booking does not exist"), HttpStatus.NOT_FOUND);
         }
         Booking booking = existingBooking.get();
-        booking.setDateOfBooking(bookingDetails.getDateOfBooking());
-        booking.setTimeFrom(bookingDetails.getTimeFrom());
-        booking.setTimeTo(bookingDetails.getTimeTo());
-        booking.setPurpose(bookingDetails.getPurpose());
+
+        // Assuming date and time updates are allowed
+        LocalDateTime newBookingDateTime = LocalDateTime.parse(bookingRequest.getDateOfBooking() + "T" + bookingRequest.getTimeFrom());
+        booking.setDateOfBooking(newBookingDateTime);
+        booking.setTimeFrom(bookingRequest.getTimeFrom());
+        booking.setTimeTo(bookingRequest.getTimeTo());
+        booking.setPurpose(bookingRequest.getPurpose());
+
+        // Save the updated booking
         bookingRepository.save(booking);
+
         return ResponseEntity.ok("Booking modified successfully");
     }
+
 
     // Delete a booking
     @DeleteMapping("/{bookingId}")
@@ -83,14 +92,14 @@ public class BookingController {
 
     // Endpoint to retrieve booking history
     @GetMapping("/history")
-    public ResponseEntity<?> getBookingHistory(@RequestParam int userId) {
-        Optional<User> user = userRepository.findById((long) userId);
+    public ResponseEntity<?> getBookingHistory(@RequestParam int userID) {
+        Optional<User> user = userRepository.findById((long) userID);
         if (!user.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse("User does not exist"));
         }
 
         // Fetch past bookings using the user ID and a date filter
-        List<Booking> bookings = bookingRepository.findByUserIdAndDateOfBookingBefore(userId, LocalDateTime.now());
+        List<Booking> bookings = bookingRepository.findByUserIdAndDateOfBookingBefore(userID, LocalDateTime.now());
 
         List<Map<String, Object>> result = transformBookingsToResponse(bookings);
         return ResponseEntity.ok(result);
@@ -98,13 +107,13 @@ public class BookingController {
 
     // Endpoint to retrieve upcoming room bookings
     @GetMapping("/upcoming")
-    public ResponseEntity<?> getUpcomingBookings(@RequestParam int userId) {
-        Optional<User> user = userRepository.findById((long) userId);
+    public ResponseEntity<?> getUpcomingBookings(@RequestParam int userID) {
+        Optional<User> user = userRepository.findById((long) userID);
         if (!user.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse("User does not exist"));
         }
 
-        List<Booking> bookings = bookingRepository.findByUserIdAndDateOfBookingAfter(userId, LocalDateTime.now());
+        List<Booking> bookings = bookingRepository.findByUserIdAndDateOfBookingAfter(userID, LocalDateTime.now());
 
         List<Map<String, Object>> result = transformBookingsToResponse(bookings);
         return ResponseEntity.ok(result);
