@@ -16,14 +16,14 @@ public class RoomController {
     @Autowired
     private RoomRepository roomRepository;
 
-    // Get all rooms
+
     @GetMapping("/rooms")
     public ResponseEntity<List<Room>> getAllRooms() {
         List<Room> rooms = roomRepository.findAll();
         return ResponseEntity.ok(rooms);
     }
 
-    // Create a new room
+
     @PostMapping("/rooms")
     public ResponseEntity<Object> addRoom(@RequestBody Room room) {
         if (roomRepository.existsByRoomName(room.getRoomName())) {
@@ -36,7 +36,7 @@ public class RoomController {
         return ResponseEntity.ok("Room created successfully");
     }
 
-    // Update a room
+
     @PatchMapping("/rooms")
     public ResponseEntity<Object> updateRoom(@RequestBody Room roomDetails) {
         int roomID = roomDetails.getRoomID();
@@ -49,12 +49,12 @@ public class RoomController {
             return ResponseEntity.badRequest().body(errorResponse("Invalid room capacity"));
         }
         room.setRoomName(roomDetails.getRoomName());
-        room.setRoomCapacity(roomDetails.getRoomCapacity());  // Updated to use roomCapacity
+        room.setRoomCapacity(roomDetails.getRoomCapacity());
         roomRepository.save(room);
         return ResponseEntity.ok("Room edited successfully");
     }
 
-    // Delete a room
+
     @DeleteMapping("/rooms")
     public ResponseEntity<Object> deleteRoom(@RequestParam int roomID) {
         if (!roomRepository.existsById(roomID)) {
@@ -64,7 +64,7 @@ public class RoomController {
         return ResponseEntity.ok("Room deleted successfully");
     }
 
-    // Get a room by id
+
     @GetMapping("/rooms/{roomID}")
     public ResponseEntity<Object> getRoomById(@PathVariable int roomID) {
         Optional<Room> room = roomRepository.findById(roomID);

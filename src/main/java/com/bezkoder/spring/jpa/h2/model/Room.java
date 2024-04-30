@@ -35,11 +35,11 @@ public class Room {
         this.roomName = roomName;
     }
 
-    public int getRoomCapacity() {  // Getter name changed
+    public int getRoomCapacity() {
         return roomCapacity;
     }
 
-    public void setRoomCapacity(int roomCapacity) {  // Setter name changed
+    public void setRoomCapacity(int roomCapacity) {
         this.roomCapacity = roomCapacity;
     }
 }

@@ -11,7 +11,7 @@ public class Booking {
     private int bookingId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "userID")  // Ensure these are correctly named
+    @JoinColumn(name = "user_id", referencedColumnName = "userID")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -23,7 +23,7 @@ public class Booking {
     private String timeTo;
     private String purpose;
 
-    // Constructors, getters, and setters
+
 
     public Booking() {
     }

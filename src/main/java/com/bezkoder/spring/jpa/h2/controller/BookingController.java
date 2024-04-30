@@ -28,7 +28,7 @@ public class BookingController {
     @Autowired
     private RoomRepository roomRepository;
 
-    // Create a new Booking
+
     @PostMapping("/book")
     public ResponseEntity<Object> createBooking(@RequestBody BookingRequest bookingRequest) {
         Optional<User> user = userRepository.findById((long) bookingRequest.getUserID());
@@ -66,7 +66,7 @@ public class BookingController {
         return ResponseEntity.ok("Booking created successfully");
     }
 
-    // Update an existing booking
+
     @PatchMapping("/book")
     public ResponseEntity<Object> updateBooking(@RequestBody BookingRequest bookingRequest) {
         Optional<Booking> existingBooking = bookingRepository.findById(bookingRequest.getBookingID());
@@ -75,7 +75,7 @@ public class BookingController {
         }
         Booking booking = existingBooking.get();
 
-        // Assuming date and time updates are allowed
+
         LocalDateTime newBookingDateTime = LocalDateTime
                 .parse(bookingRequest.getDateOfBooking() + "T" + bookingRequest.getTimeFrom());
         booking.setDateOfBooking(newBookingDateTime);
@@ -83,7 +83,7 @@ public class BookingController {
         booking.setTimeTo(bookingRequest.getTimeTo());
         booking.setPurpose(bookingRequest.getPurpose());
 
-        // Check for conflicting bookings
+
         List<Booking> conflictingBookings = bookingRepository
                 .findByRoomAndDateOfBookingAndTimeToGreaterThanEqualAndTimeFromLessThanEqual(
                         booking.getRoom(), booking.getDateOfBooking(), booking.getTimeFrom(), booking.getTimeTo());
@@ -92,12 +92,12 @@ public class BookingController {
                     .body(errorResponse("Room is already booked at the specified time"));
         }
 
-        // Save the updated booking
+
         bookingRepository.save(booking);
         return ResponseEntity.ok("Booking modified successfully");
     }
 
-    // Delete a booking
+
     @DeleteMapping("/book")
     public ResponseEntity<Object> deleteBooking(@RequestParam int bookingID) {
         if (!bookingRepository.existsById(bookingID)) {
@@ -107,7 +107,7 @@ public class BookingController {
         return ResponseEntity.ok("Booking deleted successfully");
     }
 
-    // Endpoint to retrieve booking history
+
     @GetMapping("/history")
     public ResponseEntity<?> getBookingHistory(@RequestParam int userID) {
         Optional<User> user = userRepository.findById((long) userID);
@@ -165,7 +165,7 @@ public class BookingController {
 
     @GetMapping("/bookings")
     public ResponseEntity<List<Map<String, Object>>> getAllBookings() {
-        // Fetch all bookings from the repository
+
         List<Booking> bookings = bookingRepository.findAll();
 
         List<Map<String, Object>> result = transformBookingsToResponse(bookings);
